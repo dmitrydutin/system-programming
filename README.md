@@ -7,9 +7,10 @@ client.exe --points-count=6 --start-point=0 --end-point=5 --array=[[1,2,3,4,5,6]
 
 '--count=6' -> '6'
 
-char pointsCount = '6';
-char startPoint = '0';
-char endPoint = '5';
+int pointsCount = 6;
+int startPoint = 0;
+int endPoint = 5; 
+int arraySize = число-длинна-строки-ниже
 string array = '[[], [], [], []]';
 
 send to server
