@@ -1,6 +1,7 @@
 ﻿#pragma comment(lib, "ws2_32.lib")
 #include <winsock2.h>
 #include <iostream>
+#include "FordFalkerson.h"
 using namespace std;
 
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
@@ -28,6 +29,30 @@ bool ProcessPacket(int index, Packet packetType) {
                 if (i == index) {
                     continue;
                 }
+
+                //data for demo how algorithm works
+                int** matrix = new int*[40];
+                int mtrx[][6] {
+                {0, 16, 0, 0, 12, 0},
+                {0, 0, 12, 0, 6, 0},
+                {0, 0, 0, 0, 9, 20},
+                {0, 0, 7, 0, 0, 4},
+                {0, 0, 0, 14, 0, 0},
+                {0, 0, 0, 0, 0, 0} 
+                };
+
+                //init int**
+                for (int i = 0; i < 6; i++)
+                { 
+                    matrix[i] = new int[40];
+                    for (int j = 0; j < 6; j++)
+                    {
+                        matrix[i][j] = mtrx[i][j];
+                    }
+                }
+
+                FordFalkerson ff = FordFalkerson();
+                cout << "Flow: " << ff.getMaxFlow(6, 0, 5, matrix) << endl;
 
                 Packet msgtype = P_ChatMessage;
                 send(Connections[i], (char*)&msgtype, sizeof(Packet), NULL);
