@@ -2,6 +2,7 @@
 #include <winsock2.h>
 #include <iostream>
 #include "FordFalkerson.h"
+#include <string>
 using namespace std;
 
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
@@ -11,6 +12,7 @@ SOCKET Connections[100];
 int Counter = 0;
 
 enum Packet {
+    P_GraphMaxFlowRequest,
     P_ChatMessage,
     P_Test,
 };
@@ -63,6 +65,42 @@ bool ProcessPacket(int index, Packet packetType) {
             delete[] msg;
             break;
         }
+        case P_GraphMaxFlowRequest:{
+            int pnt_cn;
+            int start_pnt;
+            int end_pnt;
+            int array_to_parce_size;
+
+            //read ints from client
+            recv(Connections[index], (char*)&pnt_cn, sizeof(int), NULL);
+            recv(Connections[index], (char*)&start_pnt, sizeof(int), NULL);
+            recv(Connections[index], (char*)&end_pnt, sizeof(int), NULL);
+            recv(Connections[index], (char*)&array_to_parce_size, sizeof(int), NULL);
+
+            //read string array from client
+
+            char* arr = new char[array_to_parce_size + 1];
+            arr[array_to_parce_size] = '\0';
+
+            recv(Connections[index], arr, array_to_parce_size, NULL);
+            
+
+            // return result to client
+            for (int i = 0; i < Counter; i++) {
+                if (i == index) {
+                    int** matrix = ParceArrayFromClient(pnt_cn, arr);
+
+                    FordFalkerson ff = FordFalkerson();
+                    int maxFlowValue = ff.getMaxFlow(6, 0, 5, matrix);
+                    cout << "Calculated from server: " << maxFlowValue << endl;
+
+                    //TODO: send data back
+                }
+            }
+
+            delete[] arr;
+            break;
+        }
         default: {
             cout << "Unrecognized packet: " << packetType << endl;
             return false;
@@ -85,6 +123,71 @@ void ClientHandler(int index) {
     }
 
     closesocket(Connections[index]);
+}
+
+int** ParceArrayFromClient(int vertexes, char* data) {
+
+    int** result = new int* [40];
+    for (int i = 0; i < vertexes; i++)
+    {
+        result[i] = new int[40];
+    }
+
+    string s = data;
+    int arrayRow = 0;
+    int arrayCol = 0;
+
+    //remove first '[' and last ']'
+    s.replace(s.find("["), 1, "");
+    s.replace(s.find_last_of("]"), 1, "");
+
+    //while we have braces
+    while (s.find("[") != std::string::npos)
+    {
+        //take first pair of braces
+        int firstOpenBrace = s.find("[");
+        int firstCloseBrace = s.find("]");
+
+        string dataInBraces =
+            s.substr(firstOpenBrace + 1, (firstCloseBrace - firstOpenBrace) - 1);
+
+        //add data from dataInBraces in array
+        string delimiter = ",";
+
+        size_t pos = 0;
+        string token;
+        while ((pos = dataInBraces.find(delimiter)) != std::string::npos)
+        {
+            token = dataInBraces.substr(0, pos);
+            result[arrayRow][arrayCol] = stoi(token);
+            dataInBraces.erase(0, pos + delimiter.length());
+            arrayCol++;
+        }
+
+        result[arrayRow][arrayCol] = stoi(dataInBraces);
+
+        //remove braces
+        s.replace(firstOpenBrace, 1, "");
+        s.replace(firstCloseBrace - 1, 1, "");
+
+        //increase counters to set data to array
+        arrayRow++;
+        arrayCol = 0;
+    }
+
+    //code below can be used for debugging this method
+
+    for (int i = 0; i < vertexes; i++)
+    {
+
+        for (int j = 0; j < vertexes; j++)
+        {
+            cout << "Arr: " << result[i][j] << endl;
+        }
+        cout << endl;
+    }
+ 
+    return result;
 }
 
 int main(int argc, char* argv[]) {
