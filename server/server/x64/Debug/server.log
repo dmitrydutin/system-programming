@@ -1,5 +1,0 @@
-﻿  server.cpp
-C:\Users\Dmitry\Desktop\СП\application\server\server\server.cpp(7,31): warning C4081: expected 'newline'; found ';'
-C:\Users\Dmitry\Desktop\СП\application\server\server\server.cpp(94,38): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\Dmitry\Desktop\СП\application\server\server\server.cpp(104,88): warning C4312: 'type cast': conversion from 'int' to 'LPVOID' of greater size
-  server.vcxproj -> C:\Users\Dmitry\Desktop\СП\application\server\x64\Debug\server.exe
