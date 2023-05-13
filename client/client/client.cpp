@@ -1,76 +1,63 @@
 ﻿#pragma comment(lib, "ws2_32.lib")
 #include <winsock2.h>
-#include <string>
 #include <iostream>
+#include <string>
 using namespace std;
 
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
-#pragma warning(disable: 4996);
+#pragma warning(disable: 4996)
 
-SOCKET Connection;
+bool startsWith(const string& str, const string& prefix);
+string getConsoleParam(int argc, char* argv[], string startMarker);
+SOCKET createConnection();
+void ClientHandler(SOCKET connection);
 
-enum Packet {
-    P_ChatMessage,
-    P_Test,
-};
-
-bool createConnection();
-void ClientHandler();
-bool ProcessPacket(Packet packetType);
-
-// Варианты 7 и 13
-// ЗАПУСК КЛИЕНТА ЧЕРЕЗ КОМАНДНУЮ СТРОКУ с указанием имени файла с заданной конфигурацией сетевого графа. Конфигурация графа матричная
 int main(int argc, char* argv[]) {
-    //cout << "Have " << argc << " arguments:" << endl;
+    const int pointsCount = stoi(getConsoleParam(argc, argv, "--points-count="));
+    const int startPoint = stoi(getConsoleParam(argc, argv, "--start-point="));
+    const int endPoint = stoi(getConsoleParam(argc, argv, "--end-point="));
+    const string array = getConsoleParam(argc, argv, "--array=");
 
-    //for (int i = 0; i < argc; ++i) {
-    //    cout << argv[i] << endl;
-    //}
+    SOCKET connection = createConnection();
+    cout << "Connection created" << endl;
+    CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)ClientHandler, (LPVOID)(connection), NULL, NULL);
 
-    //return 0;
+    send(connection, (char*)&pointsCount, sizeof(int), NULL);
+    send(connection, (char*)&startPoint, sizeof(int), NULL);
+    send(connection, (char*)&endPoint, sizeof(int), NULL);
 
-    // 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-
-    //[
-    //    [0, 0, 0, 0, 0, 0],
-    //    [0, 0, 0, 0, 0, 0],
-    //    [0, 0, 0, 0, 0, 0],
-    //    [0, 0, 0, 0, 0, 0],
-    //    [0, 0, 0, 0, 0, 0],
-    //    [0, 0, 0, 0, 0, 12],
-    //]
-
-    if (!createConnection()) {
-        exit(1);
-    }
-
-    cout << "Connection Created" << endl;
-
-    CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)ClientHandler, NULL, NULL, NULL);
-
-    string msg1;
-    while (true) {
-        getline(cin, msg1);
-        int msg_size = msg1.size();
-        Packet packetType = P_ChatMessage;
-
-        send(Connection, (char*)&packetType, sizeof(Packet), NULL);
-        send(Connection, (char*)&msg_size, sizeof(int), NULL);
-        send(Connection, msg1.c_str(), msg_size, NULL);
-        Sleep(10);
-    }
+    int arraySize = array.size();
+    send(connection, (char*)&arraySize, sizeof(int), NULL);
+    send(connection, array.c_str(), arraySize, NULL);
 
     system("pause");
     return 0;
 }
 
-bool createConnection() {
+bool startsWith(const string& str, const string& prefix) {
+    return str.rfind(prefix, 0) == 0;
+}
+
+string getConsoleParam(int argc, char* argv[], string startMarker) {
+    for (int i = 0; i < argc; i++) {
+        string arg = string(argv[i]);
+
+        if (startsWith(arg, startMarker)) {
+            return arg.substr(startMarker.length());
+        }
+    }
+
+    cout << "Param " << startMarker << " not found" << endl;
+    exit(1);
+}
+
+SOCKET createConnection() {
     WSAData wsaData;
     WORD DLLVersion = MAKEWORD(2, 1);
 
     if (WSAStartup(DLLVersion, &wsaData) != 0) {
         cout << "ERROR: Unable to start WSA" << endl;
-        return false;
+        exit(1);
     }
 
     SOCKADDR_IN addr;
@@ -79,53 +66,22 @@ bool createConnection() {
     addr.sin_port = htons(1111);
     addr.sin_family = AF_INET;
 
-    Connection = socket(AF_INET, SOCK_STREAM, NULL);
-    if (connect(Connection, (SOCKADDR*)&addr, sizeof(addr)) != 0) {
+    SOCKET connection = socket(AF_INET, SOCK_STREAM, NULL);
+
+    if (connect(connection, (SOCKADDR*)&addr, sizeof(addr)) != 0) {
         cout << "ERROR: Failed to connect to server" << endl;
-        return false;
+        exit(1);
     }
 
-    return true;
+    return connection;
 }
 
-void ClientHandler() {
-    Packet packetType;
-
+void ClientHandler(SOCKET connection) {
     while (true) {
-        recv(Connection, (char*)&packetType, sizeof(Packet), NULL);
-
-        if (!ProcessPacket(packetType)) {
-            break;
-        }
+        int result;
+        recv(connection, (char*)&result, sizeof(int), NULL);
+        cout << "Result: " << result << endl;
     }
 
-    closesocket(Connection);
-}
-
-bool ProcessPacket(Packet packetType) {
-    switch (packetType) {
-        case P_ChatMessage: {
-            int msg_size;
-            recv(Connection, (char*)&msg_size, sizeof(int), NULL);
-
-            char* msg = new char[msg_size + 1];
-            msg[msg_size] = '\0';
-            recv(Connection, msg, msg_size, NULL);
-
-            cout << msg << endl;
-
-            delete[] msg;
-            break;
-        }
-        case P_Test: {
-            cout << "TEST PACKET" << endl;
-            break;
-        }
-        default: {
-            cout << "Unrecognized packet: " << packetType << endl;
-            return false;
-        }
-    }
-
-    return true;
+    closesocket(connection);
 }
