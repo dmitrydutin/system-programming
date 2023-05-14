@@ -79,7 +79,12 @@ SOCKET createConnection() {
 void ClientHandler(SOCKET connection) {
     while (true) {
         int result;
-        recv(connection, (char*)&result, sizeof(int), NULL);
+        int checkSocket = recv(connection, (char*)&result, sizeof(int), NULL);
+
+        if (checkSocket == -1) {
+            break;
+        }
+
         cout << "Result: " << result << endl;
     }
 

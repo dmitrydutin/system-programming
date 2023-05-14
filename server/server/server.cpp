@@ -53,7 +53,7 @@ void ClientHandler(SOCKET connection) {
         int endPoint;
         int arraySize;
 
-        recv(connection, (char*)&pointsCount, sizeof(int), NULL);
+        int checkSocket = recv(connection, (char*)&pointsCount, sizeof(int), NULL);
         recv(connection, (char*)&startPoint, sizeof(int), NULL);
         recv(connection, (char*)&endPoint, sizeof(int), NULL);
         recv(connection, (char*)&arraySize, sizeof(int), NULL);
@@ -61,6 +61,16 @@ void ClientHandler(SOCKET connection) {
         char* array = new char[arraySize + 1];
         array[arraySize] = '\0';
         recv(connection, array, arraySize, NULL);
+
+        if (checkSocket == -1) {
+            break;
+        }
+
+        cout << "pointsCount " << pointsCount << endl;
+        cout << "startPoint " << startPoint << endl;
+        cout << "endPoint " << endPoint << endl;
+        cout << "arraySize " << arraySize << endl;
+        cout << "array " << array << endl;
 
         int** matrix = ParceArrayFromClient(pointsCount, array);
         FordFalkerson ff = FordFalkerson();
