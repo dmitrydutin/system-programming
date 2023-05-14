@@ -62,40 +62,10 @@ void ClientHandler(SOCKET connection) {
         array[arraySize] = '\0';
         recv(connection, array, arraySize, NULL);
 
-        //// DATA CALCULATING
-        //int** matrix = new int* [40];
-        //int mtrx[][6]{
-        //{0, 16, 0, 0, 12, 0},
-        //{0, 0, 12, 0, 6, 0},
-        //{0, 0, 0, 0, 9, 20},
-        //{0, 0, 7, 0, 0, 4},
-        //{0, 0, 0, 14, 0, 0},
-        //{0, 0, 0, 0, 0, 0}
-        //};
-
-        ////init int**
-        //for (int i = 0; i < 6; i++)
-        //{
-        //    matrix[i] = new int[40];
-        //    for (int j = 0; j < 6; j++)
-        //    {
-        //        matrix[i][j] = mtrx[i][j];
-        //    }
-        //}
-
-        //FordFalkerson ff = FordFalkerson();
-        //cout << "Flow: " << ff.getMaxFlow(6, 0, 5, matrix) << endl;
-
-        // NEW LOGIC
         int** matrix = ParceArrayFromClient(pointsCount, array);
-
         FordFalkerson ff = FordFalkerson();
-        int maxFlowValue = ff.getMaxFlow(6, 0, 5, matrix);
-        cout << "Calculated from server: " << maxFlowValue << endl;
-
-        // SEND DATA TO CLIENT
-        int result = 10;
-        send(connection, (char*)&result, sizeof(int), NULL);
+        int maxFlowValue = ff.getMaxFlow(pointsCount, startPoint, endPoint, matrix);
+        send(connection, (char*)&maxFlowValue, sizeof(int), NULL);
 
         delete[] array;
     }
