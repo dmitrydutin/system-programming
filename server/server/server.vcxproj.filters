@@ -21,9 +21,15 @@
     <ClCompile Include="FordFalkerson.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FordFalkerson2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FordFalkerson.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FordFalkerson2.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

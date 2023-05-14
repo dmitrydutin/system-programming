@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include "FordFalkerson.h"
+#include "FordFalkerson2.h"
 using namespace std;
 
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
@@ -67,7 +68,7 @@ void ClientHandler(SOCKET connection) {
         }
 
         int** matrix = ParceArrayFromClient(pointsCount, array);
-        FordFalkerson ff = FordFalkerson();
+        FordFalkerson2 ff = FordFalkerson2();
         int maxFlowValue = ff.getMaxFlow(pointsCount, startPoint, endPoint, matrix);
         send(connection, (char*)&maxFlowValue, sizeof(int), NULL);
 
