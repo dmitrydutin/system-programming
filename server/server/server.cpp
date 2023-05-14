@@ -66,12 +66,6 @@ void ClientHandler(SOCKET connection) {
             break;
         }
 
-        cout << "pointsCount " << pointsCount << endl;
-        cout << "startPoint " << startPoint << endl;
-        cout << "endPoint " << endPoint << endl;
-        cout << "arraySize " << arraySize << endl;
-        cout << "array " << array << endl;
-
         int** matrix = ParceArrayFromClient(pointsCount, array);
         FordFalkerson ff = FordFalkerson();
         int maxFlowValue = ff.getMaxFlow(pointsCount, startPoint, endPoint, matrix);

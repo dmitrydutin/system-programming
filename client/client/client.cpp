@@ -47,7 +47,7 @@ string getConsoleParam(int argc, char* argv[], string startMarker) {
         }
     }
 
-    cout << "Param " << startMarker << " not found" << endl;
+    cout << "ERROR: Param " << startMarker << " not found" << endl;
     exit(1);
 }
 
